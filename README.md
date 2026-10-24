@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OB Day 2026 Liquor Reservation
 
-## Getting Started
+Table liquor orders for the Bandaranayake College Old Boys' Association night. Guests scan a table QR, choose bottles, and send the request to the bar. Stewards deliver, collect cash or card, and close the order.
 
-First, run the development server:
+## Night-of flow
+
+1. Print `/admin/qr` and put one card on each of the 50 tables.
+2. A guest scans the QR → `/t/12` (table is already filled).
+3. They pick bottles and send the request.
+4. Stewards open `/admin` (PIN), tap **Send to table**, then **Mark delivered**.
+5. Collect cash or card and tap **Paid & close**.
+
+Stock starts at 132 bottles and drops when a request is placed. Cancelled requests put bottles back.
+
+## Stock
+
+| Bottle | Qty |
+| --- | ---: |
+| Ascot Dry Gin | 24 |
+| Eristoff Vodka | 12 |
+| V & A Black | 36 |
+| Old Reserve | 24 |
+| IDL Old | 12 |
+| Black Bacardi | 12 |
+| White Bacardi | 12 |
+| **Total** | **132** |
+
+Set rupee prices in the steward desk cellar panel before doors open. Guests can still order if a price is 0; the steward types the amount when collecting payment.
+
+## Local run
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Guest app: http://localhost:3000
+- Table example: http://localhost:3000/t/12
+- Steward desk: http://localhost:3000/admin
+- Default PIN: `obday2026`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Copy `.env.example` to `.env.local` and change `ADMIN_PIN` plus `ADMIN_SECRET` before the event.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deploy on Vercel (free)
 
-## Learn More
+The live event needs a database so every phone and the bar laptop see the same orders.
 
-To learn more about Next.js, take a look at the following resources:
+1. Push this folder to GitHub.
+2. Import the repo at [vercel.com/new](https://vercel.com/new).
+3. In the Vercel project open **Storage → Create Database → Neon** (Hobby / free).
+4. Add environment variables:
+   - `ADMIN_PIN` — steward PIN
+   - `ADMIN_SECRET` — long random string
+   - `DATABASE_URL` — Neon URL (Vercel fills this if Neon is created from Storage)
+5. Redeploy. Open `/admin/qr` on the production URL and print the 50 cards.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Windows note: `vercel deploy` from this PC can fail on a symlink permission (`EPERM`). Importing from GitHub in the Vercel dashboard avoids that. If you want CLI deploys, turn on Windows Developer Mode or run the terminal as Administrator, then `npx vercel login` and `npx vercel --prod`.
